@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getMeals } from "@api/meal.api.js";
-import MealCard from "@/components/MealCard";
+import { getMeals } from "../api/meal.api";
+import MealCard from "../components/MealCard";
 
 const Meals = () => {
   const [page, setPage] = useState(1);
