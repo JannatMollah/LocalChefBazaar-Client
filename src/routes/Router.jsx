@@ -1,25 +1,49 @@
 import { createBrowserRouter } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import Home from "../pages/Home";
-import Meals from "../pages/Meals";
 import Auth from "../pages/Auth";
+
+import Dashboard from "../pages/dashboard/Dashboard";
+import AdminDashboard from "../pages/admin/AdminDashboard";
+import ChefDashboard from "../pages/chef/ChefDashboard";
+
+import PrivateRoute from "./PrivateRoute";
+import AdminRoute from "./AdminRoute";
+import ChefRoute from "./ChefRoute";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <MainLayout />,
     children: [
+      { path: "/", element: <Home /> },
+      { path: "/auth", element: <Auth /> },
+
       {
-        index: true,
-        element: <Home />,
+        path: "/dashboard",
+        element: (
+          <PrivateRoute>
+            <Dashboard />
+          </PrivateRoute>
+        ),
       },
+
       {
-        path: "meals",
-        element: <Meals />,
+        path: "/admin",
+        element: (
+          <AdminRoute>
+            <AdminDashboard />
+          </AdminRoute>
+        ),
       },
+
       {
-        path: "/auth",
-        element: <Auth />,
+        path: "/chef",
+        element: (
+          <ChefRoute>
+            <ChefDashboard />
+          </ChefRoute>
+        ),
       },
     ],
   },
