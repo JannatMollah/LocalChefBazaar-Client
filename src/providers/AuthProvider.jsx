@@ -9,6 +9,7 @@ import {
 } from "firebase/auth";
 import app from "../firebase/firebase.config";
 import axios from "axios";
+import { getJWT, getUserRole } from "../api/auth.api";
 
 export const AuthContext = createContext(null);
 const auth = getAuth(app);
@@ -27,7 +28,7 @@ const AuthProvider = ({ children }) => {
       photoURL: image,
     });
 
-    // save to MongoDB
+    // save user to MongoDB
     await axios.post(`${import.meta.env.VITE_API_URL}/users`, {
       name: fullName,
       email,
@@ -45,8 +46,9 @@ const AuthProvider = ({ children }) => {
   /* ---------- LOGOUT ---------- */
   const logOut = async () => {
     await signOut(auth);
-    setRole(null);
+    localStorage.removeItem("access-token"); // ✅ important
     setUser(null);
+    setRole(null);
   };
 
   /* ---------- AUTH OBSERVER ---------- */
@@ -56,16 +58,19 @@ const AuthProvider = ({ children }) => {
 
       if (currentUser?.email) {
         try {
-          const res = await axios.get(
-            `${import.meta.env.VITE_API_URL}/users/${currentUser.email}`
-          );
+          /* 🔑 STEP 1: get JWT from backend */
+          const { token } = await getJWT(currentUser.email);
+          localStorage.setItem("access-token", token);
 
-          setRole(res.data?.role || "user");
+          /* 🔐 STEP 2: get role from MongoDB */
+          const roleRes = await getUserRole(currentUser.email);
+          setRole(roleRes?.role || "user");
         } catch (error) {
-          console.error("Role fetch failed:", error);
+          console.error("Auth sync failed:", error);
           setRole("user");
         }
       } else {
+        localStorage.removeItem("access-token");
         setRole(null);
       }
 
@@ -77,7 +82,7 @@ const AuthProvider = ({ children }) => {
 
   const authInfo = {
     user,
-    role,        // ✅ THIS WAS MISSING BEFORE
+    role,
     loading,
     signUp,
     signIn,
