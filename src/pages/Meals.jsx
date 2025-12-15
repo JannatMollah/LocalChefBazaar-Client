@@ -19,12 +19,17 @@ const Meals = () => {
 
   return (
     <section className="container mx-auto px-4 py-20">
-      {/* Header */}
-      <div className="text-center mb-10">
-        <h1 className="playfair-font text-5xl font-bold">
-          Explore <span className="text-primary">Delicious Meals</span>
-        </h1>
-      </div>
+      <div className="text-center mb-12 space-y-4">
+          <span className="px-4 py-1 bg-orange-100 text-orange-600 rounded-full text-sm">
+            Browse All
+          </span>
+          <h2 className="playfair-font text-4xl md:text-5xl font-bold">
+            Explore <span className="text-orange-500">Delicious Meals</span>
+          </h2>
+          <p className="text-gray-600 max-w-xl mx-auto">
+            Find your next favorite meal from our talented local chefs. Fresh, homemade, and delivered to your door.
+          </p>
+        </div>
 
       {/* Sort */}
       <div className="flex justify-end mb-6">

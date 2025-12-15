@@ -33,7 +33,7 @@ const DailyMealsSection = () => {
           {meals.map((meal) => (
             <div
               key={meal._id}
-              className="bg-[#F7F5F2] rounded-2xl overflow-hidden shadow"
+              className="bg-[#FFF9F4] rounded-2xl overflow-hidden shadow"
             >
               {/* Image */}
               <div className="relative h-48">
@@ -62,13 +62,13 @@ const DailyMealsSection = () => {
                   <span>{meal.estimatedDeliveryTime}</span>
                 </div>
 
-                <div className="flex justify-between items-center pt-3 border-t">
+                <div className="flex justify-between items-center pt-3 border-t border-gray-500/30">
                   <span className="text-xl font-bold text-orange-500">
                     ৳{meal.price}
                   </span>
                   <Link
                     to={`/meals/${meal._id}`}
-                    className="bg-orange-500 text-white px-4 py-2 rounded-lg flex items-center gap-1"
+                    className="bg-[#E26F4C] text-white px-4 py-2 rounded-lg flex items-center gap-1"
                   >
                     See Details <ArrowRight size={14} />
                   </Link>
@@ -82,7 +82,7 @@ const DailyMealsSection = () => {
         <div className="text-center mt-12">
           <Link
             to="/meals"
-            className="border px-6 py-3 rounded-xl inline-flex items-center gap-2"
+            className="border border-gray-500/30 px-6 py-3 rounded-xl inline-flex items-center gap-2"
           >
             View All Meals <ArrowRight />
           </Link>

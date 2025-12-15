@@ -39,11 +39,7 @@ const Navbar = () => {
 
   return (
     <nav
-      className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md"
-      style={{
-        backgroundColor: "var(--nav-bg)",
-        borderBottom: "1px solid var(--nav-border)",
-      }}
+      className="fixed top-0 left-0 right-0 z-50 bg-[#FBFAF8]/70 backdrop-blur-lg border-b border-gray-400/20"
     >
       <div className="max-w-7xl mx-auto px-6">
         <div className="h-16 flex items-center justify-between">
