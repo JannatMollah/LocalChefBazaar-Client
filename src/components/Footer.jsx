@@ -126,7 +126,7 @@ const Footer = () => {
         <div
           className="mt-12 pt-8 text-center text-sm border-t border-gray-400/20 text-[#AFA9A5]"
         >
-          © {new Date().getFullYear()} LocalChefBazaar. All rights reserved.
+          © {new Date().getFullYear()} Local Chef Bazaar. All rights reserved.
         </div>
       </div>
     </footer>

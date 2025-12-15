@@ -82,7 +82,7 @@ const Auth = () => {
                 <div className="flex items-center justify-center gap-2 mb-6">
                     <ChefHat className="w-9 h-9 text-[#DF603A]" />
                     <span className="playfair-font text-2xl font-bold">
-                        LocalChefBazaar
+                        Local Chef<span className="text-[#DF603A]"> Bazaar</span>
                     </span>
                 </div>
 

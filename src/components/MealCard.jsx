@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const MealCard = ({ meal }) => {
   return (
-    <div className="group rounded-2xl overflow-hidden bg-white border border-[#EFE7E1] hover:shadow-xl transition-all duration-300">
+    <div className="group rounded-2xl overflow-hidden bg-[#FFF9F4] border border-[#EFE7E1] hover:shadow-xl transition-all duration-300">
       
       {/* Image */}
       <div className="relative h-48 overflow-hidden">

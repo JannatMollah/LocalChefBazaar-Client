@@ -67,7 +67,7 @@ const Navbar = () => {
               <ChefHat className="text-white w-6 h-6" />
             </div>
             <span className="text-2xl font-semibold playfair-font">
-              LocalChef<span className="text-[#DF603A]">Bazaar</span>
+              Local Chef<span className="text-[#DF603A]"> Bazaar</span>
             </span>
           </Link>
 
