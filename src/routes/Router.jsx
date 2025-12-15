@@ -3,6 +3,7 @@ import MainLayout from "../layouts/MainLayout";
 import Home from "../pages/Home";
 import Auth from "../pages/Auth";
 import Meal from "../pages/Meals"
+import MealDetails from "../pages/MealDetails";
 
 import Dashboard from "../pages/Dashboard";
 import AdminDashboard from "../pages/AdminDashboard";
@@ -20,6 +21,14 @@ const router = createBrowserRouter([
       { path: "/", element: <Home /> },
       { path: "/auth", element: <Auth /> },
       { path: "/meals", element: <Meal />},
+      {
+        path: "/meals/:id",
+        element: (
+          <PrivateRoute>
+            <MealDetails />
+          </PrivateRoute>
+        ),
+      },
 
       {
         path: "/dashboard",
