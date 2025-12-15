@@ -8,7 +8,7 @@ import {
   User,
 } from "lucide-react";
 import { useState } from "react";
-import { useAuth } from "../hooks/useAuth.jsx";
+import useAuth from "../hooks/useAuth";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
