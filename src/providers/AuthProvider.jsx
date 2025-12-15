@@ -11,7 +11,6 @@ import app from "../firebase/firebase.config";
 import axios from "axios";
 
 export const AuthContext = createContext(null);
-
 const auth = getAuth(app);
 
 const AuthProvider = ({ children }) => {
@@ -19,27 +18,29 @@ const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     // REGISTER
-    const signUp = async (email, password, fullName, image, address) => {
-        const result = await createUserWithEmailAndPassword(auth, email, password);
+    const signUp = async ({ email, password, fullName, image, address }) => {
+        try {
+            const result = await createUserWithEmailAndPassword(auth, email, password);
 
-        await updateProfile(result.user, {
-            displayName: fullName,
-            photoURL: image,
-        });
+            await updateProfile(result.user, {
+                displayName: fullName,
+                photoURL: image,
+            });
 
-        // 🔥 SAVE TO MONGODB
-        await axios.post(`${import.meta.env.VITE_API_URL}/users`, {
-            name: fullName,
-            email,
-            image,
-            address,
-            role: "user",        // default
-            status: "active",
-            createdAt: new Date(),
-        });
+            await axios.post(`${import.meta.env.VITE_API_URL}/users`, {
+                name: fullName,
+                email,
+                image,
+                address,
+            });
 
-        return result;
+            return result;
+        } catch (error) {
+            console.error("Signup error:", error);
+            throw error;
+        }
     };
+
 
     // LOGIN
     const signIn = (email, password) => {
@@ -55,7 +56,6 @@ const AuthProvider = ({ children }) => {
             setUser(currentUser);
             setLoading(false);
         });
-
         return () => unsubscribe();
     }, []);
 

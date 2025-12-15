@@ -6,16 +6,32 @@ import {
   Shield,
   LogOut,
   User,
+  LayoutDashboard,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import useAuth from "../hooks/useAuth";
 
 const Navbar = () => {
-  const [open, setOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, role, signOut } = useAuth();
+  const { user, role, logOut } = useAuth();
 
+  /* ---------------- outside click close ---------------- */
+  useEffect(() => {
+    const handler = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  /* ---------------- nav links ---------------- */
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Meals", path: "/meals" },
@@ -24,6 +40,7 @@ const Navbar = () => {
   if (role === "admin") {
     navLinks.push({ name: "Admin", path: "/admin" });
   }
+
   if (role === "chef" || role === "admin") {
     navLinks.push({ name: "Chef Dashboard", path: "/chef" });
   }
@@ -31,33 +48,35 @@ const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   const handleLogout = async () => {
-    await signOut();
+    await logOut();
+    setDropdownOpen(false);
     navigate("/");
   };
 
-  const initials = user?.email?.slice(0, 2).toUpperCase();
+
+  const initials = user?.displayName
+    ? user.displayName.slice(0, 2).toUpperCase()
+    : user?.email?.slice(0, 2).toUpperCase();
 
   return (
-    <nav
-      className="fixed top-0 left-0 right-0 z-50 bg-[#FBFAF8]/70 backdrop-blur-lg border-b border-gray-400/20"
-    >
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#FBFAF8]/70 backdrop-blur-lg border-b border-gray-400/20">
       <div className="max-w-7xl mx-auto px-6">
         <div className="h-16 flex items-center justify-between">
-          {/* Logo */}
+          {/* ---------------- Logo ---------------- */}
           <Link to="/" className="flex items-center gap-3">
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ backgroundColor: "var(--nav-accent)" }}
+              style={{ backgroundColor: "#df603a" }}
             >
               <ChefHat className="w-6 h-6 text-white" />
             </div>
             <span className="text-2xl font-semibold playfair-font">
               Local Chef
-              <span style={{ color: "var(--nav-accent)" }}> Bazaar</span>
+              <span style={{ color: "#df603a" }}> Bazaar</span>
             </span>
           </Link>
 
-          {/* Desktop Links */}
+          {/* ---------------- Desktop Links ---------------- */}
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
               <Link
@@ -66,109 +85,147 @@ const Navbar = () => {
                 className="relative text-sm font-medium"
                 style={{
                   color: isActive(link.path)
-                    ? "var(--nav-accent)"
-                    : "var(--nav-muted)",
+                    ? "#df603a"
+                    : "#6b7280",
                 }}
               >
                 {link.name}
                 {isActive(link.path) && (
                   <span
                     className="absolute -bottom-1 left-0 right-0 h-[2px] rounded-full"
-                    style={{ backgroundColor: "var(--nav-accent)" }}
+                    style={{ backgroundColor: "#df603a" }}
                   />
                 )}
               </Link>
             ))}
           </div>
 
-          {/* Auth / User */}
-          <div className="hidden md:flex items-center gap-4">
-            {user ? (
-              <div className="relative group">
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-white cursor-pointer"
-                  style={{ backgroundColor: "var(--nav-accent)" }}
-                >
-                  {initials || <User size={18} />}
-                </div>
-
-                {/* Dropdown */}
-                <div className="absolute right-0 mt-3 w-48 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition">
-                  <div className="px-4 py-3 border-b text-sm">
-                    <p className="font-medium">{user.email}</p>
-                    <p className="text-xs text-gray-500 capitalize">
-                      {role || "user"}
-                    </p>
-                  </div>
-
-                  {role === "admin" && (
-                    <button
-                      onClick={() => navigate("/admin")}
-                      className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50"
-                    >
-                      <Shield size={16} /> Admin Dashboard
-                    </button>
-                  )}
-
-                  {(role === "chef" || role === "admin") && (
-                    <button
-                      onClick={() => navigate("/chef")}
-                      className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50"
-                    >
-                      <ChefHat size={16} /> Chef Dashboard
-                    </button>
-                  )}
-
-                  <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-gray-50"
-                  >
-                    <LogOut size={16} /> Sign Out
-                  </button>
-                </div>
-              </div>
-            ) : (
+          {/* ---------------- User / Auth ---------------- */}
+          <div className="hidden md:flex items-center gap-4 relative" ref={dropdownRef}>
+            {!user ? (
               <>
                 <Link
                   to="/auth"
-                  className="text-sm"
-                  style={{ color: "var(--nav-muted)" }}
+                  className="px-4 py-2 rounded-md text-sm text-white"
+                  style={{ backgroundColor: "#df603a" }}
                 >
                   Login
                 </Link>
-                <Link
-                  to="/auth"
-                  className="px-4 py-2 rounded-md text-sm text-white"
-                  style={{ backgroundColor: "var(--nav-accent)" }}
+              </>
+            ) : (
+              <>
+                {/* Avatar */}
+                <button
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-white"
+                  style={{ backgroundColor: "#df603a" }}
                 >
-                  Get Started
-                </Link>
+                  {initials || <User size={18} />}
+                </button>
+
+                {/* Dropdown */}
+                {dropdownOpen && (
+                  <div className="absolute right-0 top-14 w-64 bg-white rounded-xl shadow-lg border overflow-hidden">
+                    <div className="px-4 py-3 border-b text-sm">
+                      <p className="font-medium">
+                        {user.displayName || "User"}
+                      </p>
+                      <p className="text-xs text-gray-500">{user.email}</p>
+                      <p className="text-xs mt-1 capitalize text-[#df603a]">
+                        {role || "user"}
+                      </p>
+                    </div>
+
+                    {/* USER */}
+                    <DropdownItem
+                      label="My Profile"
+                      onClick={() => navigate("/dashboard/profile")}
+                    />
+                    <DropdownItem
+                      label="My Orders"
+                      onClick={() => navigate("/dashboard/orders")}
+                    />
+                    <DropdownItem
+                      label="My Reviews"
+                      onClick={() => navigate("/dashboard/reviews")}
+                    />
+                    <DropdownItem
+                      label="Favorite Meals"
+                      onClick={() => navigate("/dashboard/favorites")}
+                    />
+
+                    {/* CHEF */}
+                    {role === "chef" && (
+                      <>
+                        <Divider />
+                        <DropdownItem
+                          label="Create Meal"
+                          onClick={() => navigate("/chef/create-meal")}
+                        />
+                        <DropdownItem
+                          label="My Meals"
+                          onClick={() => navigate("/chef/meals")}
+                        />
+                        <DropdownItem
+                          label="Order Requests"
+                          onClick={() => navigate("/chef/requests")}
+                        />
+                      </>
+                    )}
+
+                    {/* ADMIN */}
+                    {role === "admin" && (
+                      <>
+                        <Divider />
+                        <DropdownItem
+                          label="Manage Users"
+                          onClick={() => navigate("/admin/users")}
+                        />
+                        <DropdownItem
+                          label="Manage Requests"
+                          onClick={() => navigate("/admin/requests")}
+                        />
+                      </>
+                    )}
+
+                    <Divider />
+
+                    {/* Logout */}
+                    <button
+                      onClick={handleLogout}
+                      className="w-full px-4 py-3 text-left text-sm text-red-600 hover:bg-gray-50 flex items-center gap-2"
+                    >
+                      <LogOut size={16} />
+                      Sign Out
+                    </button>
+                  </div>
+                )}
               </>
             )}
           </div>
 
-          {/* Mobile toggle */}
+          {/* ---------------- Mobile Toggle ---------------- */}
           <button
-            onClick={() => setOpen(!open)}
+            onClick={() => setMobileOpen(!mobileOpen)}
             className="md:hidden"
           >
-            {open ? <X /> : <Menu />}
+            {mobileOpen ? <X /> : <Menu />}
           </button>
         </div>
 
-        {/* Mobile Menu */}
-        {open && (
+        {/* ---------------- Mobile Menu ---------------- */}
+        {mobileOpen && (
           <div className="md:hidden py-4 border-t">
             <div className="flex flex-col gap-4">
               {navLinks.map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
-                  onClick={() => setOpen(false)}
+                  onClick={() => setMobileOpen(false)}
                   style={{
                     color: isActive(link.path)
-                      ? "var(--nav-accent)"
-                      : "var(--nav-muted)",
+                      ? "#df603a"
+                      : "#6b7280",
                   }}
                 >
                   {link.name}
@@ -186,7 +243,6 @@ const Navbar = () => {
                 ) : (
                   <>
                     <Link to="/auth">Login</Link>
-                    <Link to="/auth">Get Started</Link>
                   </>
                 )}
               </div>
@@ -199,3 +255,17 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
+/* ---------- helpers ---------- */
+
+const DropdownItem = ({ label, onClick }) => (
+  <button
+    onClick={onClick}
+    className="w-full px-4 py-3 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+  >
+    <LayoutDashboard size={16} />
+    {label}
+  </button>
+);
+
+const Divider = () => <div className="h-px bg-gray-200 my-1" />;

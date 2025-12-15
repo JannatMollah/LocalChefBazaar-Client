@@ -2,17 +2,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap");
 
 :root {
-  --bg: #FBFAF8;
-  --footer-bg: #30231d;
-  --footer-text: #f3f4f6;
-  --footer-muted: #b7aba4;
-  --footer-accent: #df603a;
-  --footer-border: rgba(255, 255, 255, 0.08);
-  --nav-bg: #FBFAF8;
-  --nav-border: #0000000f;
-  --nav-text: #1f2937;
-  --nav-muted: #6b7280;
-  --nav-accent: #df603a;   
+  --bg: #FBFAF8;   
 }
 
 body {
