@@ -26,9 +26,9 @@ const Footer = () => {
               >
                 <ChefHat className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xl font-semibold">
-                LocalChef
-                <span style={{ color: "var(--footer-accent)" }}>Bazaar</span>
+              <span className="text-xl font-semibold playfair-font">
+                Local Chef
+                <span style={{ color: "var(--footer-accent)" }}> Bazaar</span>
               </span>
             </Link>
 

@@ -2,20 +2,13 @@
 @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap");
 
 :root {
-  --bg: #fff7ed;           
-  --surface: #ffffff;
-  --border: #e5e7eb;
-  --text-main: #1f2937;      
-  --text-muted: #6b7280;     
-  --primary: #f97316;         
-  --primary-hover: #ea580c;   
-  --accent: #fde68a;
+  --bg: #FBFAF8;
   --footer-bg: #30231d;
   --footer-text: #f3f4f6;
   --footer-muted: #b7aba4;
   --footer-accent: #df603a;
   --footer-border: rgba(255, 255, 255, 0.08);
-  --nav-bg: rgba(255, 247, 237, 0.85);
+  --nav-bg: #FBFAF8;
   --nav-border: rgba(0, 0, 0, 0.06);
   --nav-text: #1f2937;
   --nav-muted: #6b7280;
@@ -24,59 +17,13 @@
 
 body {
   background-color: var(--bg);
-  color: var(--text-main);
-  font-family: "Inter", system-ui, sans-serif;
+  font-family: "Inter", sans-serif;
+}
+
+.playfair-font {
+  font-family: "Playfair", serif;
 }
 
 h1, h2, h3, h4, h5 {
   font-family: "Playfair Display", serif;
-}
-
-.bg-surface {
-  background-color: var(--surface);
-}
-
-.bg-primary {
-  background-color: var(--primary);
-}
-
-.bg-primary-hover:hover {
-  background-color: var(--primary-hover);
-}
-
-.text-primary {
-  color: var(--primary);
-}
-
-.text-muted {
-  color: var(--text-muted);
-}
-
-.border-default {
-  border-color: var(--border);
-}
-
-.bg-footer {
-  background-color: var(--footer-bg);
-}
-
-.text-footer {
-  color: var(--footer-text);
-}
-
-.text-footer-muted {
-  color: var(--footer-muted);
-}
-
-.text-footer-accent {
-  color: var(--footer-accent);
-}
-
-.border-footer {
-  border-color: var(--footer-divider);
-}
-
-.footer-icon {
-  background-color: rgba(223, 96, 58, 0.15);
-  color: var(--footer-accent);
 }
