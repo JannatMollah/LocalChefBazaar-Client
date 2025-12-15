@@ -10,6 +10,8 @@ import AdminDashboard from "../pages/AdminDashboard";
 import ChefDashboard from "../pages/ChefDashboard";
 
 import PrivateRoute from "./PrivateRoute";
+import StripeProvider from "../providers/StripeProvider";
+import Payment from "../pages/Payment";
 import AdminRoute from "./AdminRoute";
 import ChefRoute from "./ChefRoute";
 
@@ -28,6 +30,18 @@ const router = createBrowserRouter([
             <MealDetails />
           </PrivateRoute>
         ),
+      },
+
+      {
+        path: "/payment/:id",
+        element: (
+          <PrivateRoute>
+            <StripeProvider>
+              <Payment />
+            </StripeProvider>
+          </PrivateRoute>
+        )
+
       },
 
       {

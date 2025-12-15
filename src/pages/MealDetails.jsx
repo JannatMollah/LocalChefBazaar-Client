@@ -148,7 +148,7 @@ const MealDetails = () => {
               ৳{meal.price}
             </span>
             <button
-              onClick={handleOrder}
+              onClick={() => navigate(`/payment/${meal._id}`)}
               className="flex items-center gap-2 px-6 py-3 bg-[#DF603A] text-white rounded-xl hover:bg-[#c95432] transition"
             >
               <ShoppingCart size={18} />
