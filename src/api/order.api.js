@@ -1,6 +1,6 @@
 import axiosSecure from "./axiosSecure";
 
-// Place single order
+// Place single order (Direct Order)
 export const placeOrder = async (orderData) => {
   try {
     const res = await axiosSecure.post("/orders", orderData);
@@ -11,13 +11,35 @@ export const placeOrder = async (orderData) => {
   }
 };
 
-// Place bulk order (multiple items)
+// Place bulk order (Checkout from Cart)
 export const placeBulkOrder = async (orderData) => {
   try {
-    const res = await axiosSecure.post("/orders/bulk", orderData);
+    const res = await axiosSecure.post("/orders", orderData);
     return res.data;
   } catch (error) {
     console.error("Error placing bulk order:", error);
+    throw error;
+  }
+};
+
+// Create Stripe payment intent
+export const createPaymentIntent = async (paymentData) => {
+  try {
+    const res = await axiosSecure.post("/payments/create-intent", paymentData);
+    return res.data;
+  } catch (error) {
+    console.error("Error creating payment intent:", error);
+    throw error;
+  }
+};
+
+// Confirm payment success
+export const confirmPayment = async (paymentData) => {
+  try {
+    const res = await axiosSecure.post("/payments/success", paymentData);
+    return res.data;
+  } catch (error) {
+    console.error("Error confirming payment:", error);
     throw error;
   }
 };

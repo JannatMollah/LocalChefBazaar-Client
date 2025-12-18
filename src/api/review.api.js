@@ -56,3 +56,13 @@ export const deleteReview = async (id) => {
     throw error;
   }
 };
+
+export const getUserReviews = async () => {
+  try {
+    const res = await axiosSecure.get("/reviews/my");
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching user reviews:", error);
+    return [];
+  }
+};

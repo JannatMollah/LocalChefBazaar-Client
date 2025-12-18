@@ -1,31 +1,38 @@
-import axios from "axios";
+import axiosSecure from "./axiosSecure";
 
-const API = import.meta.env.VITE_API_URL;
-
-export const createPaymentIntent = async (price) => {
-  const token = localStorage.getItem("access-token");
-
-  const res = await axios.post(
-    `${API}/payments/create-intent`,
-    { price },
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-
-  return res.data;
+// Create Stripe payment intent
+export const createPaymentIntent = async (paymentData) => {
+  try {
+    console.log("Creating payment intent with data:", paymentData);
+    
+    const res = await axiosSecure.post("/payments/create-intent", paymentData);
+    
+    console.log("Payment intent response:", res.data);
+    return res.data;
+  } catch (error) {
+    console.error("Error creating payment intent:", error.response?.data || error.message);
+    throw error;
+  }
 };
 
-export const savePayment = async (paymentData) => {
-  const token = localStorage.getItem("access-token");
+// Confirm payment success
+export const confirmPayment = async (paymentData) => {
+  try {
+    const res = await axiosSecure.post("/payments/success", paymentData);
+    return res.data;
+  } catch (error) {
+    console.error("Error confirming payment:", error);
+    throw error;
+  }
+};
 
-  const res = await axios.post(`${API}/payments`, paymentData, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  return res.data;
+// Get payment history
+export const getPaymentHistory = async () => {
+  try {
+    const res = await axiosSecure.get("/payments/history");
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching payment history:", error);
+    return [];
+  }
 };
