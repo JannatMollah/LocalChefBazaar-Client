@@ -9,11 +9,11 @@ import {
   Clock,
   Award,
   Utensils,
-  Upload,
   Loader2,
   CheckCircle,
   AlertCircle,
-  X,
+  Plus,
+  Minus,
 } from "lucide-react";
 import useAuth from "../../../hooks/useAuth";
 import axiosSecure from "../../../api/axiosSecure";
@@ -25,7 +25,6 @@ const createMealSchema = z.object({
   foodName: z.string().min(3, "Food name must be at least 3 characters"),
   foodImage: z.string().url("Please enter a valid image URL").optional().or(z.literal('')),
   price: z.number().min(1, "Price must be at least 1"),
-  ingredients: z.string().min(10, "Please list at least 3 ingredients"),
   estimatedDeliveryTime: z.string().min(2, "Please enter estimated delivery time"),
   category: z.string().min(2, "Please select a category"),
   description: z.string().min(20, "Please provide a description"),
@@ -36,6 +35,8 @@ const CreateMeal = () => {
   const { user: firebaseUser } = useAuth();
   const queryClient = useQueryClient();
   const [imagePreview, setImagePreview] = useState("");
+  const [ingredients, setIngredients] = useState([""]);
+  const [newIngredient, setNewIngredient] = useState("");
 
   // Fetch chef data
   const { data: chef, isLoading: chefLoading } = useQuery({
@@ -60,14 +61,12 @@ const CreateMeal = () => {
     formState: { errors },
     reset,
     watch,
-    setValue,
   } = useForm({
     resolver: zodResolver(createMealSchema),
     defaultValues: {
       foodName: "",
       foodImage: "",
       price: 0,
-      ingredients: "",
       estimatedDeliveryTime: "30-45 minutes",
       category: "",
       description: "",
@@ -77,23 +76,52 @@ const CreateMeal = () => {
 
   const foodImage = watch("foodImage");
 
-  // Update image preview when image URL changes
-  useState(() => {
-    if (foodImage) {
-      setImagePreview(foodImage);
+  // Add new ingredient
+  const handleAddIngredient = () => {
+    if (newIngredient.trim() === "") return;
+    
+    setIngredients([...ingredients, newIngredient.trim()]);
+    setNewIngredient("");
+  };
+
+  // Remove ingredient
+  const handleRemoveIngredient = (index) => {
+    const newIngredients = ingredients.filter((_, i) => i !== index);
+    setIngredients(newIngredients);
+  };
+
+  // Update ingredient
+  const handleUpdateIngredient = (index, value) => {
+    const newIngredients = [...ingredients];
+    newIngredients[index] = value;
+    setIngredients(newIngredients);
+  };
+
+  // Add ingredient on Enter key press
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddIngredient();
     }
-  }, [foodImage]);
+  };
 
   // Create meal mutation
   const createMealMutation = useMutation({
     mutationFn: async (data) => {
+      // Filter out empty ingredients and create array
+      const filteredIngredients = ingredients
+        .filter(ing => ing.trim() !== "")
+        .map(ing => ing.trim());
+      
       const mealData = {
         ...data,
+        ingredients: filteredIngredients, // Send as array
         chefName: chef?.name || firebaseUser?.displayName,
         chefId: chef?.chefId,
         userEmail: firebaseUser.email,
         chefExperience: chef?.experience || "Not specified",
         rating: 0,
+        isAvailable: true,
         createdAt: new Date().toISOString(),
       };
       
@@ -112,6 +140,8 @@ const CreateMeal = () => {
       
       reset();
       setImagePreview("");
+      setIngredients([""]);
+      setNewIngredient("");
       queryClient.invalidateQueries(["chefMeals", chef?.chefId]);
       queryClient.invalidateQueries(["chefStats", chef?.chefId]);
     },
@@ -127,6 +157,18 @@ const CreateMeal = () => {
   });
 
   const onSubmit = async (data) => {
+    // Validate that at least one ingredient is provided
+    const filteredIngredients = ingredients.filter(ing => ing.trim() !== "");
+    if (filteredIngredients.length === 0) {
+      Swal.fire({
+        title: "Missing Ingredients",
+        text: "Please add at least one ingredient",
+        icon: "warning",
+        confirmButtonColor: "#DF603A",
+      });
+      return;
+    }
+    
     createMealMutation.mutate(data);
   };
 
@@ -268,48 +310,38 @@ const CreateMeal = () => {
                   <Camera className="w-4 h-4" />
                   Food Image URL *
                 </label>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <input
-                      {...register("foodImage")}
-                      type="url"
-                      className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-[#DF603A] focus:border-transparent"
-                      placeholder="https://example.com/food-image.jpg"
-                      onChange={(e) => setImagePreview(e.target.value)}
-                    />
-                    {errors.foodImage && (
-                      <p className="text-red-500 text-sm mt-1">{errors.foodImage.message}</p>
-                    )}
-                    <p className="text-sm text-gray-500 mt-2">
-                      Enter a direct image URL. You can use services like Imgur or Google Photos.
-                    </p>
-                  </div>
-                  
-                  <div className="flex flex-col items-center">
-                    <div className="w-full h-48 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center overflow-hidden">
-                      {imagePreview ? (
-                        <img
-                          src={imagePreview}
-                          alt="Preview"
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.parentElement.innerHTML = `
-                              <div class="text-center p-4">
-                                <Upload class="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                                <p class="text-sm text-gray-500">Invalid image URL</p>
-                              </div>
-                            `;
-                          }}
-                        />
-                      ) : (
-                        <div className="text-center p-4">
-                          <Upload className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                          <p className="text-sm text-gray-500">Image preview will appear here</p>
-                        </div>
-                      )}
+                <div>
+                  <input
+                    {...register("foodImage")}
+                    type="url"
+                    className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-[#DF603A] focus:border-transparent"
+                    placeholder="https://example.com/food-image.jpg"
+                    onChange={(e) => setImagePreview(e.target.value)}
+                  />
+                  {errors.foodImage && (
+                    <p className="text-red-500 text-sm mt-1">{errors.foodImage.message}</p>
+                  )}
+                  <p className="text-sm text-gray-500 mt-2">
+                    Enter a direct image URL. You can use services like Imgur or Google Photos.
+                  </p>
+                  {imagePreview && (
+                    <div className="mt-4">
+                      <p className="text-sm text-gray-700 mb-2">Image Preview:</p>
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-48 h-32 object-cover rounded-lg border"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.parentElement.innerHTML = `
+                            <div class="w-48 h-32 bg-gray-200 rounded-lg flex items-center justify-center border">
+                              <p class="text-gray-500 text-sm">Invalid image URL</p>
+                            </div>
+                          `;
+                        }}
+                      />
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
 
@@ -349,9 +381,10 @@ const CreateMeal = () => {
                     <option value="1 hour">1 hour</option>
                     <option value="1.5 hours">1.5 hours</option>
                     <option value="2 hours">2 hours</option>
+                    <option value="2+ hours">2+ hours</option>
                   </select>
                   {errors.prepTime && (
-                    <p className="text-red500 text-sm mt-1">{errors.prepTime.message}</p>
+                    <p className="text-red-500 text-sm mt-1">{errors.prepTime.message}</p>
                   )}
                 </div>
               </div>
@@ -379,23 +412,63 @@ const CreateMeal = () => {
                 )}
               </div>
 
-              {/* Ingredients */}
-              <div className="space-y-2">
+              {/* Ingredients (Array Format) */}
+              <div className="space-y-3">
                 <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                   <Utensils className="w-4 h-4" />
                   Ingredients *
+                  <span className="text-xs text-gray-500 font-normal ml-2">
+                    ({ingredients.filter(ing => ing.trim() !== "").length} added)
+                  </span>
                 </label>
-                <textarea
-                  {...register("ingredients")}
-                  rows="3"
-                  className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-[#DF603A] focus:border-transparent"
-                  placeholder="List all ingredients separated by commas. e.g., Chicken, Rice, Spices, Oil, Onion, Garlic"
-                />
-                {errors.ingredients && (
-                  <p className="text-red-500 text-sm mt-1">{errors.ingredients.message}</p>
-                )}
-                <p className="text-sm text-gray-500 mt-1">
-                  Separate ingredients with commas. Be specific about quantities if needed.
+                
+                <div className="space-y-3">
+                  {/* Existing Ingredients */}
+                  {ingredients.map((ingredient, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={ingredient}
+                        onChange={(e) => handleUpdateIngredient(index, e.target.value)}
+                        className="flex-1 border rounded-xl p-3 focus:ring-2 focus:ring-[#DF603A] focus:border-transparent"
+                        placeholder={`Ingredient ${index + 1} (e.g., Rice, Chicken, Spices)`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveIngredient(index)}
+                        className="p-3 bg-red-100 text-red-600 rounded-xl hover:bg-red-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={ingredients.length <= 1}
+                        title="Remove ingredient"
+                      >
+                        <Minus className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                  
+                  {/* Add New Ingredient */}
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={newIngredient}
+                      onChange={(e) => setNewIngredient(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      className="flex-1 border rounded-xl p-3 focus:ring-2 focus:ring-[#DF603A] focus:border-transparent"
+                      placeholder="Type ingredient and press Enter or click +"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddIngredient}
+                      className="p-3 bg-green-100 text-green-600 rounded-xl hover:bg-green-200 transition disabled:opacity-50"
+                      disabled={newIngredient.trim() === ""}
+                      title="Add ingredient"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+                
+                <p className="text-sm text-gray-500 mt-2">
+                  Add one ingredient at a time. Press Enter or click + to add. Ingredients will be saved as an array.
                 </p>
               </div>
 
@@ -462,6 +535,10 @@ const CreateMeal = () => {
             <li className="flex items-start gap-2">
               <div className="w-2 h-2 bg-blue-500 rounded-full mt-2" />
               <span>Price competitively while covering your costs</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full mt-2" />
+              <span><strong>Ingredients:</strong> Add each ingredient separately, they will be saved as an array in database</span>
             </li>
           </ul>
         </div>
