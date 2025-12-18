@@ -6,6 +6,8 @@ import Meals from "../pages/Meals";
 import MealDetails from "../pages/MealDetails";
 import OrderPage from "../pages/OrderPage";
 import Payment from "../pages/Payment";
+import Cart from "../pages/Cart";
+import Checkout from "../pages/Checkout";
 
 // Dashboard Layouts
 import DashboardLayout from "../layouts/DashboardLayout";
@@ -49,6 +51,22 @@ const router = createBrowserRouter([
         element: (
           <PrivateRoute>
             <MealDetails />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "/cart",
+        element: (
+          <PrivateRoute>
+             <Cart />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "/checkout",
+        element: (
+          <PrivateRoute>
+            <Checkout />
           </PrivateRoute>
         ),
       },

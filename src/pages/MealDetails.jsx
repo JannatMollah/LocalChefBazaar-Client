@@ -12,6 +12,9 @@ import {
   Calendar,
   Check,
   Loader2,
+  CreditCard,
+  Shield,
+  Truck
 } from "lucide-react";
 import useAuth from "../hooks/useAuth";
 import {
@@ -19,6 +22,8 @@ import {
   checkFavorite,
   addFavorite,
   removeFavorite,
+  placeOrder,
+  addToCart,
 } from "../api/meal.api";
 import { getReviewsByMeal, addReview } from "../api/review.api";
 import Swal from "sweetalert2";
@@ -40,6 +45,7 @@ const MealDetails = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [favoriteId, setFavoriteId] = useState(null);
   const [showReviewForm, setShowReviewForm] = useState(false);
+  const [cartLoading, setCartLoading] = useState(false);
 
   // React Hook Form for review
   const {
@@ -54,6 +60,62 @@ const MealDetails = () => {
       comment: "",
     },
   });
+
+  /* ---------- Add to Cart ---------- */
+  const handleAddToCart = async () => {
+    if (!user) {
+      navigate("/auth", { state: { from: `/meals/${id}` } });
+      return;
+    }
+
+    if (role === "chef" || role === "admin") {
+      Swal.fire({
+        title: "Restricted",
+        text: `${role === "chef" ? "Chefs" : "Admins"} cannot add items to cart`,
+        icon: "warning",
+      });
+      return;
+    }
+
+    setCartLoading(true);
+
+    try {
+      // addToCart ফাংশন import করতে হবে meal.api.js থেকে
+      await addToCart({
+        mealId: meal._id,
+        mealName: meal.foodName,
+        price: meal.price,
+        foodImage: meal.foodImage,
+        chefName: meal.chefName,
+        chefId: meal.chefId,
+        quantity: 1,
+      });
+
+      Swal.fire({
+        title: "Added to Cart! 🛒",
+        text: `${meal.foodName} has been added to your shopping cart`,
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false,
+        position: "bottom-end",
+        toast: true,
+        background: "#10B981",
+        color: "white",
+      });
+
+      // Cart count update করতে query invalidate করুন
+      queryClient.invalidateQueries(["cart"]);
+    } catch (error) {
+      console.error("Cart error:", error);
+      Swal.fire({
+        title: "Oops!",
+        text: "Failed to add item to cart. Please try again.",
+        icon: "error",
+      });
+    } finally {
+      setCartLoading(false);
+    }
+  };
 
   /* ---------- Fetch Meal ---------- */
   const {
@@ -274,7 +336,7 @@ const MealDetails = () => {
                 alt={meal.foodName}
                 className="w-full h-[450px] object-cover transition-transform duration-700 hover:scale-105"
               />
-              
+
               {/* Favorite Button */}
               <button
                 onClick={handleFavorite}
@@ -286,11 +348,10 @@ const MealDetails = () => {
                   <Loader2 className="w-6 h-6 animate-spin text-[#DF603A]" />
                 ) : (
                   <Heart
-                    className={`w-7 h-7 ${
-                      isFavorite
-                        ? "fill-[#DF603A] text-[#DF603A] animate-pulse"
-                        : "text-gray-400 hover:text-[#DF603A]"
-                    }`}
+                    className={`w-7 h-7 ${isFavorite
+                      ? "fill-[#DF603A] text-[#DF603A] animate-pulse"
+                      : "text-gray-400 hover:text-[#DF603A]"
+                      }`}
                   />
                 )}
               </button>
@@ -350,11 +411,10 @@ const MealDetails = () => {
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
-                        className={`w-5 h-5 ${
-                          i < (meal.rating || 0)
-                            ? "text-yellow-500 fill-yellow-500"
-                            : "text-gray-300"
-                        }`}
+                        className={`w-5 h-5 ${i < (meal.rating || 0)
+                          ? "text-yellow-500 fill-yellow-500"
+                          : "text-gray-300"
+                          }`}
                       />
                     ))}
                   </div>
@@ -376,7 +436,7 @@ const MealDetails = () => {
                 "A carefully crafted homemade meal made with fresh ingredients and traditional recipes. Each bite delivers authentic flavors that remind you of home cooking."}
             </p>
 
-            {/* Price & Order */}
+            {/* Price & Actions */}
             <div className="bg-gradient-to-r from-[#FFF5F0] to-orange-50 rounded-2xl p-6 border border-orange-100">
               <div className="flex justify-between items-center">
                 <div>
@@ -385,21 +445,86 @@ const MealDetails = () => {
                     ৳{meal.price}
                     <span className="text-lg text-gray-400">/serving</span>
                   </p>
+                  <p className="text-sm text-gray-500 mt-2">
+                    Free delivery on orders over ৳500
+                  </p>
                 </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                {/* Add to Cart Button */}
+                <button
+                  onClick={handleAddToCart}
+                  disabled={role === "chef" || role === "admin" || cartLoading}
+                  className="group flex items-center justify-center gap-3 px-6 py-4 bg-white border-2 border-[#DF603A] text-[#DF603A] rounded-xl hover:bg-[#DF603A] hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {cartLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <>
+                      <ShoppingCart className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                      <span className="text-lg font-semibold">Add to Cart</span>
+                    </>
+                  )}
+                </button>
+
+                {/* Order Now Button */}
                 <button
                   onClick={handleOrder}
                   disabled={role === "chef" || role === "admin"}
-                  className="flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-[#DF603A] to-orange-500 text-white rounded-xl hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="group flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-[#DF603A] to-orange-500 text-white rounded-xl hover:shadow-xl hover:shadow-orange-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <ShoppingCart className="w-6 h-6" />
+                  <CreditCard className="w-6 h-6 group-hover:scale-110 transition-transform" />
                   <span className="text-lg font-semibold">Order Now</span>
                 </button>
               </div>
+
+              {/* Role Restrictions */}
               {role === "chef" || role === "admin" ? (
-                <p className="text-sm text-amber-600 mt-3 text-center">
-                  {role === "chef" ? "Chefs cannot order meals" : "Admins cannot place orders"}
-                </p>
-              ) : null}
+                <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <p className="text-sm text-amber-700 text-center">
+                    <span className="font-semibold">
+                      {role === "chef" ? "Chefs" : "Admins"}
+                    </span>{" "}
+                    cannot {role === "chef" ? "order meals" : "place orders"} -{" "}
+                    <span className="italic">Switch to user account</span>
+                  </p>
+                </div>
+              ) : (
+                <div className="mt-4 flex items-center justify-center gap-6 text-sm text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-green-600" />
+                    <span>Secure Payment</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Truck className="w-4 h-4 text-blue-600" />
+                    <span>30-45 min Delivery</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Quick Stats */}
+              <div className="grid grid-cols-3 gap-3 mt-6 pt-6 border-t border-orange-100">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-[#2D1B12]">
+                    {meal.rating || "4.5"}
+                  </p>
+                  <p className="text-xs text-gray-500">Rating</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-[#2D1B12]">
+                    {reviews.length}
+                  </p>
+                  <p className="text-xs text-gray-500">Reviews</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-[#2D1B12]">
+                    {meal.estimatedDeliveryTime?.split(" ")[0] || "30"}
+                  </p>
+                  <p className="text-xs text-gray-500">Minutes</p>
+                </div>
+              </div>
             </div>
 
             {/* Ingredients */}
@@ -484,11 +609,10 @@ const MealDetails = () => {
                         className="focus:outline-none"
                       >
                         <Star
-                          className={`w-8 h-8 ${
-                            star <= (register("rating").value || 5)
-                              ? "text-yellow-500 fill-yellow-500"
-                              : "text-gray-300"
-                          }`}
+                          className={`w-8 h-8 ${star <= (register("rating").value || 5)
+                            ? "text-yellow-500 fill-yellow-500"
+                            : "text-gray-300"
+                            }`}
                         />
                       </button>
                     ))}
@@ -570,11 +694,10 @@ const MealDetails = () => {
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
-                          className={`w-4 h-4 ${
-                            i < review.rating
-                              ? "text-yellow-500 fill-yellow-500"
-                              : "text-gray-300"
-                          }`}
+                          className={`w-4 h-4 ${i < review.rating
+                            ? "text-yellow-500 fill-yellow-500"
+                            : "text-gray-300"
+                            }`}
                         />
                       ))}
                     </div>

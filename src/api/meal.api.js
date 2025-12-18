@@ -90,3 +90,14 @@ export const getChefOrders = async (chefId) => {
     return [];
   }
 };
+
+// ADD TO CART
+export const addToCart = async (cartItem) => {
+  try {
+    const res = await axiosSecure.post("/cart", cartItem);
+    return res.data;
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+    throw error;
+  }
+};
