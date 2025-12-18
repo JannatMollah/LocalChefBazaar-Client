@@ -1,20 +1,58 @@
-import axios from "axios";
+import axiosSecure from "./axiosSecure";
 
 const API = import.meta.env.VITE_API_URL;
 
+// GET REVIEWS BY MEAL ID
 export const getReviewsByMeal = async (mealId) => {
-  const res = await axios.get(`${API}/reviews?mealId=${mealId}`);
-  return res.data;
+  try {
+    const res = await axiosSecure.get(`/reviews/food/${mealId}`);
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching reviews:", error);
+    return [];
+  }
 };
 
+// ADD NEW REVIEW
 export const addReview = async (reviewData) => {
-  const token = localStorage.getItem("access-token");
+  try {
+    const res = await axiosSecure.post("/reviews", reviewData);
+    return res.data;
+  } catch (error) {
+    console.error("Error adding review:", error);
+    throw error;
+  }
+};
 
-  const res = await axios.post(`${API}/reviews`, reviewData, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+// GET MY REVIEWS
+export const getMyReviews = async () => {
+  try {
+    const res = await axiosSecure.get("/reviews/my");
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching my reviews:", error);
+    return [];
+  }
+};
 
-  return res.data;
+// UPDATE REVIEW
+export const updateReview = async (id, updatedData) => {
+  try {
+    const res = await axiosSecure.patch(`/reviews/${id}`, updatedData);
+    return res.data;
+  } catch (error) {
+    console.error("Error updating review:", error);
+    throw error;
+  }
+};
+
+// DELETE REVIEW
+export const deleteReview = async (id) => {
+  try {
+    const res = await axiosSecure.delete(`/reviews/${id}`);
+    return res.data;
+  } catch (error) {
+    console.error("Error deleting review:", error);
+    throw error;
+  }
 };

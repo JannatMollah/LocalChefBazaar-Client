@@ -131,7 +131,7 @@ const Navbar = () => {
                     </div>
 
                     {/* USER */}
-                    <DropdownItem label="My Profile" onClick={() => navigate("/dashboard/profile")} />
+                    <DropdownItem label="My Profile" onClick={() => navigate("/profile")} />
                     <DropdownItem label="My Orders" onClick={() => navigate("/dashboard/orders")} />
                     <DropdownItem label="My Reviews" onClick={() => navigate("/dashboard/reviews")} />
                     <DropdownItem label="Favorite Meals" onClick={() => navigate("/dashboard/favorites")} />
