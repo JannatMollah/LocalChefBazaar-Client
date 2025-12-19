@@ -19,6 +19,7 @@ import UserProfile from "../pages/dashboard/user/UserProfile";
 import MyOrders from "../pages/dashboard/user/MyOrders";
 import MyReviews from "../pages/dashboard/user/MyReviews";
 import FavoriteMeals from "../pages/dashboard/user/FavoriteMeals";
+import TrackOrder from "../pages/dashboard/user/TrackOrder";
 
 // Chef Dashboard Pages
 import ChefProfile from "../pages/dashboard/chef/ChefProfile";
@@ -105,6 +106,7 @@ const router = createBrowserRouter([
       { path: "orders", element: <MyOrders /> },
       { path: "reviews", element: <MyReviews /> },
       { path: "favorites", element: <FavoriteMeals /> },
+      { path: "tracking", element: <TrackOrder /> },
     ],
   },
 

@@ -377,10 +377,14 @@ const MyOrders = () => {
                     )}
                     
                     {order.orderStatus === "delivered" && (
-                      <button className="flex items-center gap-2 border border-green-300 text-green-600 px-4 py-2 rounded-xl hover:bg-green-50 transition">
+                      // <button className="flex items-center gap-2 border border-green-300 text-green-600 px-4 py-2 rounded-xl hover:bg-green-50 transition">
+                      //   <Truck className="w-4 h-4" />
+                      //   Track Delivery
+                      // </button>
+                      <Link to="/dashboard/tracking" className="flex items-center gap-2 border border-green-300 text-green-600 px-4 py-2 rounded-xl hover:bg-green-50 transition">
                         <Truck className="w-4 h-4" />
                         Track Delivery
-                      </button>
+                      </Link>
                     )}
                   </div>
                 </div>
