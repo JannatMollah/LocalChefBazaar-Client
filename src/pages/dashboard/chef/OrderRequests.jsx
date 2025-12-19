@@ -71,10 +71,16 @@ const OrderRequests = () => {
     mutationFn: async ({ orderId, status }) => {
       await axiosSecure.patch(`/orders/status/${orderId}`, { status });
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      const statusMessages = {
+        accepted: "Order has been accepted successfully",
+        delivered: "Order has been marked as delivered",
+        cancelled: "Order has been cancelled"
+      };
+      
       Swal.fire({
         title: "Status Updated!",
-        text: "Order status has been updated successfully",
+        text: statusMessages[variables.status] || "Order status has been updated successfully",
         icon: "success",
         confirmButtonColor: "#DF603A",
         timer: 2000,
@@ -94,24 +100,17 @@ const OrderRequests = () => {
     },
   });
 
-  const handleStatusUpdate = (orderId, currentStatus, newStatus) => {
-    const statusMap = {
-      pending: { label: "Accept", next: "accepted" },
-      accepted: { label: "Deliver", next: "delivered" },
-      cancelled: { label: "Cancelled", next: null },
-      delivered: { label: "Delivered", next: null }
-    };
-
-    const action = statusMap[newStatus]?.label.toLowerCase();
-    
+  const handleAcceptOrder = (orderId) => {
     Swal.fire({
-      title: `${action.charAt(0).toUpperCase() + action.slice(1)} Order?`,
+      title: "Accept Order?",
       html: `
         <div class="text-left">
-          <p class="text-gray-700 mb-2">Are you sure you want to ${action} this order?</p>
-          <div class="bg-yellow-50 p-3 rounded-lg border border-yellow-200 mt-3">
-            <p class="text-sm text-yellow-700">
-              This action will notify the customer about the status change.
+          <p class="text-gray-700 mb-2">Are you sure you want to accept this order?</p>
+          <div class="bg-blue-50 p-3 rounded-lg border border-blue-200 mt-3">
+            <p class="text-sm text-blue-700">
+              • Order will be marked as "Accepted"<br>
+              • Customer will be notified<br>
+              • You can start preparing the meal
             </p>
           </div>
         </div>
@@ -120,13 +119,44 @@ const OrderRequests = () => {
       showCancelButton: true,
       confirmButtonColor: "#DF603A",
       cancelButtonColor: "#6B7280",
-      confirmButtonText: `Yes, ${action}`,
+      confirmButtonText: "Yes, Accept Order",
       cancelButtonText: "Cancel",
     }).then((result) => {
       if (result.isConfirmed) {
         updateOrderStatusMutation.mutate({ 
           orderId, 
-          status: statusMap[newStatus].next || newStatus 
+          status: "accepted" 
+        });
+      }
+    });
+  };
+
+  const handleDeliverOrder = (orderId) => {
+    Swal.fire({
+      title: "Deliver Order?",
+      html: `
+        <div class="text-left">
+          <p class="text-gray-700 mb-2">Are you sure you want to mark this order as delivered?</p>
+          <div class="bg-green-50 p-3 rounded-lg border border-green-200 mt-3">
+            <p class="text-sm text-green-700">
+              • Order will be marked as "Delivered"<br>
+              • Customer will be notified<br>
+              • This action cannot be undone
+            </p>
+          </div>
+        </div>
+      `,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#10B981",
+      cancelButtonColor: "#6B7280",
+      confirmButtonText: "Yes, Mark as Delivered",
+      cancelButtonText: "Cancel",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        updateOrderStatusMutation.mutate({ 
+          orderId, 
+          status: "delivered" 
         });
       }
     });
@@ -135,10 +165,21 @@ const OrderRequests = () => {
   const handleCancelOrder = (orderId) => {
     Swal.fire({
       title: "Cancel Order?",
-      text: "This order will be cancelled and the customer will be notified.",
+      html: `
+        <div class="text-left">
+          <p class="text-gray-700 mb-2">Are you sure you want to cancel this order?</p>
+          <div class="bg-red-50 p-3 rounded-lg border border-red-200 mt-3">
+            <p class="text-sm text-red-700">
+              • Order will be marked as "Cancelled"<br>
+              • Customer will be notified and refunded if paid<br>
+              • This action cannot be undone
+            </p>
+          </div>
+        </div>
+      `,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#DF603A",
+      confirmButtonColor: "#EF4444",
       cancelButtonColor: "#6B7280",
       confirmButtonText: "Yes, Cancel Order",
       cancelButtonText: "Go Back",
@@ -429,14 +470,13 @@ const OrderRequests = () => {
                     {order.orderStatus === "pending" && (
                       <>
                         <button
-                          onClick={() => handleStatusUpdate(order._id, order.orderStatus, "accepted")}
+                          onClick={() => handleAcceptOrder(order._id)}
                           disabled={updateOrderStatusMutation.isLoading}
                           className="flex items-center gap-2 bg-[#DF603A] text-white px-4 py-2 rounded-xl hover:bg-[#c95232] transition disabled:opacity-50"
                         >
                           <CheckCircle className="w-4 h-4" />
                           Accept Order
                         </button>
-                        
                         <button
                           onClick={() => handleCancelOrder(order._id)}
                           disabled={updateOrderStatusMutation.isLoading}
@@ -449,14 +489,24 @@ const OrderRequests = () => {
                     )}
                     
                     {order.orderStatus === "accepted" && (
-                      <button
-                        onClick={() => handleStatusUpdate(order._id, order.orderStatus, "delivered")}
-                        disabled={updateOrderStatusMutation.isLoading}
-                        className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition disabled:opacity-50"
-                      >
-                        <Truck className="w-4 h-4" />
-                        Mark as Delivered
-                      </button>
+                      <>
+                        <button
+                          onClick={() => handleDeliverOrder(order._id)}
+                          disabled={updateOrderStatusMutation.isLoading}
+                          className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition disabled:opacity-50"
+                        >
+                          <Truck className="w-4 h-4" />
+                          Mark as Delivered
+                        </button>
+                        <button
+                          onClick={() => handleCancelOrder(order._id)}
+                          disabled={updateOrderStatusMutation.isLoading}
+                          className="flex items-center gap-2 border border-red-300 text-red-600 px-4 py-2 rounded-xl hover:bg-red-50 transition disabled:opacity-50"
+                        >
+                          <XCircle className="w-4 h-4" />
+                          Cancel Order
+                        </button>
+                      </>
                     )}
                     
                     {(order.orderStatus === "delivered" || order.orderStatus === "cancelled") && (

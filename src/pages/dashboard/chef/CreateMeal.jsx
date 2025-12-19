@@ -120,7 +120,7 @@ const CreateMeal = () => {
         chefId: chef?.chefId,
         userEmail: firebaseUser.email,
         chefExperience: chef?.experience || "Not specified",
-        rating: 0,
+        rating: 5,
         isAvailable: true,
         createdAt: new Date().toISOString(),
       };
