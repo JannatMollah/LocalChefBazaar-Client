@@ -8,7 +8,7 @@ const ChefRoute = ({ children }) => {
     return <div className="text-center mt-20">Loading...</div>;
   }
 
-  if (!user || (role !== "chef" && role !== "admin")) {
+  if (!user || role !== "chef") {
     return <Navigate to="/" replace />;
   }
 

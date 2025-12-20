@@ -1,13 +1,13 @@
 import { Link } from "react-router-dom";
 import { Star, Clock, ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import axiosSecure from "../../api/axiosSecure";
 
 const DailyMealsSection = () => {
   const { data: meals = [] } = useQuery({
     queryKey: ["daily-meals"],
     queryFn: async () => {
-      const res = await axios.get("http://localhost:5000/meals");
+      const res = await axiosSecure.get("/meals");
       return res.data.meals;
     },
   });
