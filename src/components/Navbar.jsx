@@ -335,7 +335,7 @@ const Navbar = () => {
                     label="My Profile" 
                     icon={User}
                     onClick={() => {
-                      navigate("/dashboard/profile");
+                      navigate("/chef-dashboard/profile");
                       setDropdownOpen(false);
                     }} 
                   />
@@ -473,7 +473,7 @@ const Navbar = () => {
                     label="My Profile" 
                     icon={User}
                     onClick={() => {
-                      navigate("/dashboard/profile");
+                      navigate("/admin-dashboard/profile");
                       setDropdownOpen(false);
                     }} 
                   />
