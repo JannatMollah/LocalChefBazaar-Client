@@ -4,13 +4,25 @@ import { useQuery } from "@tanstack/react-query";
 import axiosSecure from "../../api/axiosSecure";
 
 const DailyMealsSection = () => {
-  const { data: meals = [] } = useQuery({
+  const { data: meals = [], isLoading } = useQuery({
     queryKey: ["daily-meals"],
     queryFn: async () => {
       const res = await axiosSecure.get("/meals");
       return res.data.meals;
     },
   });
+
+  if (isLoading) {
+    return (
+      <section className="py-20 bg-[#FFF9F4]">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="min-h-[240px] flex items-center justify-center">
+            <span className="loading loading-spinner loading-lg text-orange-500"></span>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-20 bg-[#FFF9F4]">
